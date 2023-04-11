@@ -2,8 +2,9 @@
 
 print("mypackage is being imported!")
 
-from .ops.py import *
-from .stats.py import *
+# from .ops import *
+from .stats import *
+from .geo_io import *
 # from .vis.py import *
 # from .module2 import MyClass
 
