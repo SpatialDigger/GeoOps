@@ -2,10 +2,18 @@ import geopandas as gpd
 from shapely.geometry import Point, LineString, Polygon, MultiPoint
 from shapely.ops import transform, unary_union, polygonize, cascaded_union
 from osgeo import gdal
-import rasterstats
+# import rasterstats
 import numpy as np
 from scipy.stats import skew, kurtosis
 import pandas as pd
+
+def filter_by_attribute(gdf, column, value):
+    # filter the geodataframe by an attribute value
+    filtered_gdf = gdf.query('STATE_NAME == "California"')
+
+    # filter the geodataframe by a spatial condition
+    bbox = (-125, 31, -114, 43)  # define a bounding box as (minx, miny, maxx, maxy)
+    filtered_gdf = gdf.cx[bbox]
 
 def buffer(geometry, distance):
     """
