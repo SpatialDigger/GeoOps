@@ -8,6 +8,7 @@ from scipy.stats import skew, kurtosis
 import pandas as pd
 
 def filter_by_attribute(gdf, column, value):
+    # TODO: write this function to handle various filtering methods
     # filter the geodataframe by an attribute value
     filtered_gdf = gdf.query('STATE_NAME == "California"')
 
@@ -24,15 +25,14 @@ def buffer(geometry, distance):
     return geometry.buffer(distance)
 
 
-def intersect():
+def intersect(geometry1, geometry2):
     """
-    Intersects all shapes in the list and returns a single shape
+    Returns the intersection of two geometries.
+    Status: untested
     """
-    print('intersection')
-    # intersection = shapes[0]
-    # for shape in shapes[1:]:
-    #     intersection = intersection.intersection(shape)
-    # return intersection
+    intersection = geometry1.intersection(geometry2)
+    return intersection
+
 
 def union():
     """
