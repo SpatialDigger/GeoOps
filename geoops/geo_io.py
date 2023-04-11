@@ -63,8 +63,9 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
         features = []
         while True:
             print(offset)
-            query = f"{base_url}?where=1%3D1&f=geojson&resultOffset={offset}&resultRecordCount={rows_per_request}"
+            query = f"{base_url}?outFields=*&where=1%3D1&f=geojson&resultOffset={offset}&resultRecordCount={rows_per_request}"
             gdf = gpd.read_file(query)
+
             if len(gdf) == 0:
                 break
             features.append(gdf)
