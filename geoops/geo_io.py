@@ -72,13 +72,14 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
             offset += rows_per_request
         # features = gpd.GeoDataFrame(pd.concat(features, geometry=features, ignore_index=True))
 
-        # # concatenate all dataframes in the list into a single geodataframe
-        features = pd.concat(features, ignore_index=True)
-        #
-        # # convert the resulting dataframe into a geodataframe
-        features = gpd.GeoDataFrame(features, geometry=features.geometry)
+        # # # concatenate all dataframes in the list into a single geodataframe
+        # features = pd.concat(features, ignore_index=True)
+        # #
+        # # # convert the resulting dataframe into a geodataframe
+        # features = gpd.GeoDataFrame(features, geometry=features.geometry)
+        gdf = gpd.GeoDataFrame(pd.concat(features, ignore_index=True))
 
-        return features
+        return gdf
     elif file_path.endswith('.geojson'):
         with open(file_path) as f:
             data = json.load(f)
