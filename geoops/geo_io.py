@@ -3,6 +3,9 @@ import pandas as pd
 import json
 import requests
 import pprint
+import pkgutil
+import os
+import tempfile
 
 
 def get_record_limit(url):
@@ -57,8 +60,6 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
                 print(f"Limit exceeded, using server limit of {max_rows}")
                 rows_per_request = max_rows
         number_requests = count / rows_per_request
-
-        # continue with the rest of the code
         print(f"Record Count = {count}, spliiting into {number_requests} requests")
         features = []
         while True:
@@ -70,15 +71,8 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
                 break
             features.append(gdf)
             offset += rows_per_request
-        # features = gpd.GeoDataFrame(pd.concat(features, geometry=features, ignore_index=True))
-
-        # # # concatenate all dataframes in the list into a single geodataframe
-        # features = pd.concat(features, ignore_index=True)
-        # #
-        # # # convert the resulting dataframe into a geodataframe
-        # features = gpd.GeoDataFrame(features, geometry=features.geometry)
         gdf = gpd.GeoDataFrame(pd.concat(features, ignore_index=True))
-
+        gdf = gdf.to_crs(crs)
         return gdf
     elif file_path.endswith('.geojson'):
         with open(file_path) as f:
@@ -88,6 +82,46 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
         print("File is not a shapefile or URL")
         return None
 
+
+
+
+
+
+def to_arcgis_geodb(data, gdb_path, name, schema=None, overwrite=True):
+    if pkgutil.find_loader("arcpy") is not None:
+
+        # Create a temporary directory and get its name
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create a GeoDataFrame with some data
+            data = gpd.GeoDataFrame({"id": [1, 2], "geometry": [Point(0, 0), Point(1, 1)]})
+
+            # Write the GeoDataFrame to a temporary file in the temporary directory
+            tmpfile = tmpdir + "/data.geojson"
+            data.to_file(tmpfile, driver="GeoJSON")
+
+            # Read the temporary file back into a new GeoDataFrame
+            # new_data = gpd.read_file(tmpfile)
+
+            # Do something with the new GeoDataFrame
+            # print(new_data.head())
+
+        # Check if the geometry type of the GeoDataFrame is 'Polygon'
+        is_polygon = data.geometry.geom_type.isin(['Polygon']).all()
+
+        if is_polygon:
+            print('The GeoDataFrame contains only Polygon geometries.')
+            geom_type = 'Polygon'
+        else:
+            print('The GeoDataFrame contains at least one non-Polygon geometry.')
+
+        if schema in not None:
+            arcpy.conversion.JSONToFeatures(
+                in_json_file=tmpfile,
+                out_file=os.path.join(gdb_path, schema, name),
+                geometry_type=geom_type
+            )
+    else:
+        print('arcpy not found, unable to write')
 
 # url = "https://services-eu1.arcgis.com/ZOdPfBS3aqqDYPUQ/arcgis/rest/services/National_Heritage_List_for_England_NHLE/FeatureServer/3/query?outFields=*&where=1%3D1&f=geojson"
 # read_files(url, rows_per_request=2000)
