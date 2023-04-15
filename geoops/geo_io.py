@@ -114,7 +114,7 @@ def to_arcgis_geodb(data, gdb_path, name, schema=None, overwrite=True):
         else:
             print('The GeoDataFrame contains at least one non-Polygon geometry.')
 
-        if schema in not None:
+        if schema is not None:
             arcpy.conversion.JSONToFeatures(
                 in_json_file=tmpfile,
                 out_file=os.path.join(gdb_path, schema, name),
