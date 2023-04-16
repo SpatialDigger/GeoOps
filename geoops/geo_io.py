@@ -6,6 +6,9 @@ import pprint
 import pkgutil
 import os
 import tempfile
+import numpy as np
+
+import rasterio
 
 
 def get_record_limit(url):
@@ -84,7 +87,44 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
 
 
 
+def read_raster_file(raster_file):
+    with rasterio.open(raster_file) as raster:
+        raster_array = raster.read(1)
+        raster_profile = raster.profile
+    return raster_array, raster_profile
 
+
+
+
+
+def write_raster(filename, data, transform, crs):
+    """
+    Write a GeoTIFF raster using the given data, transform, and CRS.
+
+    Args:
+        filename (str): Output file name.
+        data (numpy.ndarray): 2D numpy array of raster values.
+        transform (affine.Affine): Affine transformation object.
+        crs (rasterio.crs.CRS): CRS object.
+
+    Returns:
+        None.
+    """
+    height, width = data.shape
+    count = 1
+    dtype = data.dtype
+    with rasterio.open(
+        filename,
+        'w',
+        driver='GTiff',
+        height=height,
+        width=width,
+        count=count,
+        dtype=dtype,
+        crs=crs,
+        transform=transform
+    ) as dst:
+        dst.write(data, 1)
 
 
 # def to_arcgis_geodb(data, gdb_path, name, schema=None, overwrite=True):
