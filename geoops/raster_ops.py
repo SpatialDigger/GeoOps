@@ -3,8 +3,47 @@ import glob
 import rasterio
 from rasterio import merge
 import matplotlib.pyplot as plt
+import time
 
-from geoops.geo_io import time_recording
+# from geoops.geo_io import time_recording
+
+
+def time_recording(type='start'):
+    """
+    Record the start time, end time, or duration of a process.
+
+    Args:
+        type (str): The type of time recording. Options are 'start', 'end', or 'duration'.
+                    Defaults to 'start'.
+
+    Returns:
+        float or str or None: The recorded time or None if the type is invalid.
+    """
+    global start_time, end_time
+
+    # Check if the type argument is valid
+    if type not in ['start', 'end', 'duration']:
+        print("Error: Invalid time recording type. Must be 'start', 'end', or 'duration'.")
+        return None
+
+    # Record the start time
+    if type == 'start':
+        start_time = time.time()
+        return time.strftime("%H:%M:%S", time.localtime(start_time))
+    # Record the end time
+    elif type == 'end':
+        end_time = time.time()
+        return time.strftime("%H:%M:%S", time.localtime(end_time))
+    # Calculate the duration
+    elif type == 'duration':
+        if start_time is not None and end_time is not None:
+            duration = end_time - start_time
+            hours, remainder = divmod(duration, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+        else:
+            print("Error: Both start time and end time must be recorded.")
+            return None
 
 def merge_geotiffs(geotif_folder, out_folder, out_file_name='', recursive=False, crs=27700):
     """
