@@ -3,6 +3,7 @@ import glob
 import rasterio
 from rasterio import merge
 
+from geoops.geo_io import time_recording
 
 def merge_geotiffs(geotif_folder, out_folder, out_file_name='', recursive=False, crs=27700):
     """
