@@ -2,6 +2,7 @@ import os
 import glob
 import rasterio
 from rasterio import merge
+import matplotlib.pyplot as plt
 
 from geoops.geo_io import time_recording
 
@@ -77,3 +78,27 @@ def merge_geotiffs(geotif_folder, out_folder, out_file_name='', recursive=False,
     print(f"Duration: {duration}")
     print('processing complete')
     print(f'{len(selected_geotiffs)} tiffs merged to {os.path.join(out_folder, out_file_name)}')
+
+
+def view_raster(raster_file, cmap='gray', min_value=0, display_meta=False, fig_size=(10, 10), display_axis=True):
+    # Open the raster
+    with rasterio.open(raster_file) as src:
+
+        # Read in band1 of the raster
+        raster = src.read(1)
+
+        # Make sure the crs is used
+        crs = src.crs
+        transform = src.transform
+
+    # Plot the raster
+    fig, ax = plt.subplots(figsize=fig_size)
+    ax.imshow(raster, cmap=cmap, extent=src.bounds, vmin=min_value)
+    if display_axis:
+        ax.set_axis_on()
+    plt.show()
+    if display_meta:
+        # print out the meta data in case there are any issues to be followed up
+        print(src.meta)
+
+
