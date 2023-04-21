@@ -7,8 +7,47 @@ import pkgutil
 import os
 import tempfile
 import numpy as np
-
+import fiona
 import rasterio
+import time
+
+
+def time_recording(type='start'):
+    """
+    Record the start time, end time, or duration of a process.
+
+    Args:
+        type (str): The type of time recording. Options are 'start', 'end', or 'duration'.
+                    Defaults to 'start'.
+
+    Returns:
+        float or str or None: The recorded time or None if the type is invalid.
+    """
+    global start_time, end_time
+
+    # Check if the type argument is valid
+    if type not in ['start', 'end', 'duration']:
+        print("Error: Invalid time recording type. Must be 'start', 'end', or 'duration'.")
+        return None
+
+    # Record the start time
+    if type == 'start':
+        start_time = time.time()
+        return time.strftime("%H:%M:%S", time.localtime(start_time))
+    # Record the end time
+    elif type == 'end':
+        end_time = time.time()
+        return time.strftime("%H:%M:%S", time.localtime(end_time))
+    # Calculate the duration
+    elif type == 'duration':
+        if start_time is not None and end_time is not None:
+            duration = end_time - start_time
+            hours, remainder = divmod(duration, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
+        else:
+            print("Error: Both start time and end time must be recorded.")
+            return None
 
 
 def get_record_limit(url):
@@ -47,9 +86,11 @@ def get_feature_count(url):
     return data["count"]
 
 
-def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
-    if file_path.endswith('.shp'):
+def read_files(file_path, file, rows_per_request=0, offset=0, crs=27700):
+    if file.endswith('.shp'):
         return gpd.read_file(file_path)
+    if file_path.endswith('.gdb'):
+        gpd.read_file(os.path.join(file_path, file))
     elif file_path.startswith('http://') or file_path.startswith('https://'):
         base_url = file_path.split("?")[0]  # remove any existing parameters
         count = get_feature_count(url=base_url)
