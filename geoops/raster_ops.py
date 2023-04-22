@@ -233,12 +233,12 @@ def raster_calculator(raster1, raster2, output_path, operation):
 import rasterio
 
 
-def compute_raster_summary(raster_file, nodata=None, display_summary=False):
+def raster_stats(raster_file, nodata=None, display_summary=False):
     """
     Compute summary statistics from a raster dataset, including nodata handling.
 
     Args:
-        raster_path (str): The file path of the raster dataset.
+        raster_file (str): The file path of the raster dataset.
         nodata (float or int, optional): The nodata value of the raster. Defaults to None.
 
     Returns:
