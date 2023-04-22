@@ -247,7 +247,8 @@ def view_raster(raster_file, cmap='gray', min_value=0, display_meta=False, fig_s
 #             dst.write(result, 1)
 
 
-
+import numpy as np
+import rasterio
 
 def raster_calculator(raster1, raster2, output_path, operation):
     # Open the input raster datasets
@@ -255,26 +256,24 @@ def raster_calculator(raster1, raster2, output_path, operation):
     src2 = rasterio.open(raster2)
 
     # Read the raster bands as numpy arrays
-    arr1 = src1.read(1)
-    arr2 = src2.read(1)
+    arr1 = src1.read(1, masked=True) # Read with masked array to handle nodata values
+    arr2 = src2.read(1, masked=True)
 
     # Perform the specified operation
     if operation == 'add':
-        result = arr1 + arr2
+        result = np.ma.masked_array(arr1 + arr2, mask=(arr1.mask | arr2.mask)) # Perform addition with nodata handling
     elif operation == 'subtract':
-        result = arr1 - arr2
+        result = np.ma.masked_array(arr1 - arr2, mask=(arr1.mask | arr2.mask)) # Subtract two rasters saving the difference
     elif operation == 'multiply':
-        result = arr1 * arr2
+        result = np.ma.masked_array(arr1 * arr2, mask=(arr1.mask | arr2.mask)) # Multiply the two rasters and save the result
     elif operation == 'divide':
-        result = arr1 / arr2
+        result = np.ma.masked_array(arr1 / arr2, mask=(arr1.mask | arr2.mask)) # Divide the two rasters saving the result
     elif operation == 'power':
-        result = arr1 ** arr2
+        result = np.ma.masked_array(arr1 ** arr2, mask=(arr1.mask | arr2.mask)) #
     elif operation == 'min':
-        result = arr1 * arr2
-        result = result.min(axis=0)
+        result = np.ma.masked_array(np.minimum(arr1, arr2), mask=(arr1.mask | arr2.mask)) # compare the two rasters and get the minimum value
     elif operation == 'max':
-        result = arr1 * arr2
-        result = result.max(axis=0)
+        result = np.ma.masked_array(np.maximum(arr1, arr2), mask=(arr1.mask | arr2.mask)) # compare the two rasters and get the maximum value
 
     # Write the result to the output raster
     profile = src1.profile
