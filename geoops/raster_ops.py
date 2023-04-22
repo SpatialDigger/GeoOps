@@ -140,53 +140,92 @@ def view_raster(raster_file, cmap='gray', min_value=0, display_meta=False, fig_s
         # print out the meta data in case there are any issues to be followed up
         print(src.meta)
 
+#
+# def map_calculator(raster1, raster2, output_path, operation):
+#     """
+#     Perform a map calculation on two raster images and save the result to a new raster image.
+#
+#     Args:
+#         input_path1 (str): Path to the first input raster image.
+#         input_path2 (str): Path to the second input raster image.
+#         output_path (str): Path to save the output raster image.
+#         operation (str): The operation to perform on the input raster images. Supported operations are:
+#                         'add': Addition
+#                         'subtract': Subtraction
+#                         'multiply': Multiplication
+#                         'divide': Division
+#                         'power': Exponentiation
+#                         'min': Minimum
+#                         'max': Maximum
+#
+#     Returns:
+#         None
+#     """
+#     with rasterio.open(raster1) as src1, rasterio.open(raster2) as src2:
+#         # Check if the input raster images have the same shape and CRS
+#         if src1.shape != src2.shape or src1.crs != src2.crs:
+#             raise ValueError("Input raster images must have the same shape and CRS")
+#
+#         # Perform the map calculation based on the operation
+#         if operation == 'add':
+#             result = src1.read(1) + src2.read(1)
+#         elif operation == 'subtract':
+#             result = src1.read(1) - src2.read(1)
+#         elif operation == 'multiply':
+#             result = src1.read(1) * src2.read(1)
+#         elif operation == 'divide':
+#             result = src1.read(1) / src2.read(1)
+#         elif operation == 'power':
+#             result = src1.read(1) ** src2.read(1)
+#         elif operation == 'min':
+#             result = rasterio.band((src1.read(1), src2.read(1))).min(axis=0)
+#         elif operation == 'max':
+#             result = rasterio.band((src1.read(1), src2.read(1))).max(axis=0)
+#         else:
+#             raise ValueError("Invalid operation. Supported operations are: 'add', 'subtract', 'multiply', 'divide', 'power', 'min', 'max'")
+#
+#         # Create the output raster image
+#         profile = src1.profile
+#         with rasterio.open(output_path, 'w', **profile) as dst:
+#             dst.write(result, 1)
 
-def map_calculator(raster1, raster2, output_path, operation):
-    """
-    Perform a map calculation on two raster images and save the result to a new raster image.
 
-    Args:
-        input_path1 (str): Path to the first input raster image.
-        input_path2 (str): Path to the second input raster image.
-        output_path (str): Path to save the output raster image.
-        operation (str): The operation to perform on the input raster images. Supported operations are:
-                        'add': Addition
-                        'subtract': Subtraction
-                        'multiply': Multiplication
-                        'divide': Division
-                        'power': Exponentiation
-                        'min': Minimum
-                        'max': Maximum
 
-    Returns:
-        None
-    """
-    with rasterio.open(raster1) as src1, rasterio.open(raster2) as src2:
-        # Check if the input raster images have the same shape and CRS
-        if src1.shape != src2.shape or src1.crs != src2.crs:
-            raise ValueError("Input raster images must have the same shape and CRS")
 
-        # Perform the map calculation based on the operation
-        if operation == 'add':
-            result = src1.read(1) + src2.read(1)
-        elif operation == 'subtract':
-            result = src1.read(1) - src2.read(1)
-        elif operation == 'multiply':
-            result = src1.read(1) * src2.read(1)
-        elif operation == 'divide':
-            result = src1.read(1) / src2.read(1)
-        elif operation == 'power':
-            result = src1.read(1) ** src2.read(1)
-        elif operation == 'min':
-            result = rasterio.band((src1.read(1), src2.read(1))).min(axis=0)
-        elif operation == 'max':
-            result = rasterio.band((src1.read(1), src2.read(1))).max(axis=0)
-        else:
-            raise ValueError("Invalid operation. Supported operations are: 'add', 'subtract', 'multiply', 'divide', 'power', 'min', 'max'")
+def raster_calculator(raster1, raster2, output_path, operation):
+    # Open the input raster datasets
+    src1 = rasterio.open(raster1)
+    src2 = rasterio.open(raster2)
 
-        # Create the output raster image
-        profile = src1.profile
-        with rasterio.open(output_path, 'w', **profile) as dst:
-            dst.write(result, 1)
+    # Read the raster bands as numpy arrays
+    arr1 = src1.read(1)
+    arr2 = src2.read(1)
 
+    # Perform the specified operation
+    if operation == 'add':
+        result = arr1 + arr2
+    elif operation == 'subtract':
+        result = arr1 - arr2
+    elif operation == 'multiply':
+        result = arr1 * arr2
+    elif operation == 'divide':
+        result = arr1 / arr2
+    elif operation == 'power':
+        result = arr1 ** arr2
+    elif operation == 'min':
+        result = arr1 * arr2
+        result = result.min(axis=0)
+    elif operation == 'max':
+        result = arr1 * arr2
+        result = result.max(axis=0)
+
+    # Write the result to the output raster
+    profile = src1.profile
+    profile.update(count=1)
+    with rasterio.open(output_path, 'w', **profile) as dst:
+        dst.write(result, 1)
+
+    # Close the input raster datasets
+    src1.close()
+    src2.close()
 
