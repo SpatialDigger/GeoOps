@@ -229,3 +229,63 @@ def raster_calculator(raster1, raster2, output_path, operation):
     src1.close()
     src2.close()
 
+
+import rasterio
+
+
+def compute_raster_summary(raster_path, nodata=None, display_summary=False):
+    """
+    Compute summary statistics from a raster dataset, including nodata handling.
+
+    Args:
+        raster_path (str): The file path of the raster dataset.
+        nodata (float or int, optional): The nodata value of the raster. Defaults to None.
+
+    Returns:
+        dict: A dictionary containing the computed summary statistics, including nodata count.
+    """
+    # Open raster dataset
+    with rasterio.open(raster_path) as src:
+        # Read raster data as a NumPy array
+        raster_data = src.read(1)
+
+        # Detect nodata value from raster metadata if not provided
+        if nodata is None:
+            nodata = src.nodata
+
+        # Mask nodata values
+        if nodata is not None:
+            raster_data = raster_data[raster_data != nodata]
+
+        # Compute summary statistics
+        min_value = raster_data.min()
+        max_value = raster_data.max()
+        mean_value = raster_data.mean()
+        std_value = raster_data.std()
+
+        # Count nodata values
+        nodata_count = 0
+        if nodata is not None:
+            nodata_count = (src.read(1) == nodata).sum()
+
+        # Create a dictionary to store the summary statistics
+        summary = {
+            'minimum': min_value,
+            'maximum': max_value,
+            'mean': mean_value,
+            'standard_deviation': std_value,
+            'nodata': nodata,
+            'nodata_count': nodata_count
+        }
+    if display_summary:
+        print("Summary statistics for raster file:", raster_file)
+        print("Minimum value:", summary['minimum'])
+        print("Maximum value:", summary['maximum'])
+        print("Mean value:", summary['mean'])
+        print("Standard deviation:", summary['standard_deviation'])
+        print("Nodata value:", summary['nodata'])
+        print("Nodata count:", summary['nodata_count'])
+
+    return summary
+
+
