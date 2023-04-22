@@ -233,7 +233,7 @@ def raster_calculator(raster1, raster2, output_path, operation):
 import rasterio
 
 
-def compute_raster_summary(raster_path, nodata=None, display_summary=False):
+def compute_raster_summary(raster_file, nodata=None, display_summary=False):
     """
     Compute summary statistics from a raster dataset, including nodata handling.
 
@@ -245,7 +245,7 @@ def compute_raster_summary(raster_path, nodata=None, display_summary=False):
         dict: A dictionary containing the computed summary statistics, including nodata count.
     """
     # Open raster dataset
-    with rasterio.open(raster_path) as src:
+    with rasterio.open(raster_file) as src:
         # Read raster data as a NumPy array
         raster_data = src.read(1)
 
@@ -278,7 +278,7 @@ def compute_raster_summary(raster_path, nodata=None, display_summary=False):
             'nodata_count': nodata_count
         }
     if display_summary:
-        print("Summary statistics for raster file:", raster_path)
+        print("Summary statistics for raster file:", raster_file)
         print("Minimum value:", summary['minimum'])
         print("Maximum value:", summary['maximum'])
         print("Mean value:", summary['mean'])
