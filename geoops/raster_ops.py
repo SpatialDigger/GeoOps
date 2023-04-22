@@ -230,9 +230,6 @@ def raster_calculator(raster1, raster2, output_path, operation):
     src2.close()
 
 
-import rasterio
-
-
 def raster_stats(raster_file, nodata=None, display_summary=False):
     """
     Compute summary statistics from a raster dataset, including nodata handling.
