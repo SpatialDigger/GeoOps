@@ -230,7 +230,7 @@ def raster_calculator(raster1, raster2, output_path, operation):
     src2.close()
 
 
-def raster_stats(raster_file, nodata=None, display_summary=False):
+def raster_summary(raster_file, nodata=None, display_summary=False):
     """
     Compute summary statistics from a raster dataset, including nodata handling.
 
