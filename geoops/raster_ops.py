@@ -278,7 +278,7 @@ def compute_raster_summary(raster_path, nodata=None, display_summary=False):
             'nodata_count': nodata_count
         }
     if display_summary:
-        print("Summary statistics for raster file:", raster_file)
+        print("Summary statistics for raster file:", raster_path)
         print("Minimum value:", summary['minimum'])
         print("Maximum value:", summary['maximum'])
         print("Mean value:", summary['mean'])
