@@ -48,7 +48,7 @@ def get_feature_count(url):
     return data["count"]
 
 
-def read_files(file_path, file='', rows_per_request=0, offset=0, crs=27700):
+def read_files(file_path, rows_per_request=0, offset=0, crs=27700, file=''):
     if file.endswith('.shp'):
         return gpd.read_file(file_path)
     if file_path.endswith('.gdb'):
