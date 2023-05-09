@@ -50,7 +50,8 @@ def get_feature_count(url):
 
 def read_files(file_path, rows_per_request=0, offset=0, crs=27700, file=''):
     if file.endswith('.shp'):
-        return gpd.read_file(file_path)
+        gdf = gpd.read_file(file_path)
+        return gdf
     if file_path.endswith('.gdb'):
         gpd.read_file(os.path.join(file_path, file))
     elif file_path.startswith('http://') or file_path.startswith('https://'):
@@ -89,15 +90,11 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700, file=''):
         return None
 
 
-
 def read_raster_file(raster_file):
     with rasterio.open(raster_file) as raster:
         raster_array = raster.read(1)
         raster_profile = raster.profile
     return raster_array, raster_profile
-
-
-
 
 
 def write_raster(filename, data, transform, crs):
