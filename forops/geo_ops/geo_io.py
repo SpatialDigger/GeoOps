@@ -48,14 +48,14 @@ def get_feature_count(url):
     return data["count"]
 
 
-def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
+def read_data(file_path, rows_per_request=0, offset=0, crs=27700):
     if file_path.endswith('.shp'):
         gdf = gpd.read_file(file_path)
         return gdf
     elif file_path.endswith('.csv'):
         df = pd.read_csv(file_path)
         gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geometry))
-        gdf.set_crs(crs)
+        gdf = gdf.set_crs(crs)
         return gdf
     elif file_path.endswith('.gdb'):
         gpd.read_file(os.path.join(file_path, file))
