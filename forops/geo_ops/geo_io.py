@@ -55,6 +55,7 @@ def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
     elif file_path.endswith('.csv'):
         df = pd.read_csv(file_path)
         gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geometry))
+        gdf.set_crs(crs)
         return gdf
     elif file_path.endswith('.gdb'):
         gpd.read_file(os.path.join(file_path, file))
