@@ -48,11 +48,15 @@ def get_feature_count(url):
     return data["count"]
 
 
-def read_files(file_path, rows_per_request=0, offset=0, crs=27700, file=''):
-    if file.endswith('.shp'):
+def read_files(file_path, rows_per_request=0, offset=0, crs=27700):
+    if file_path.endswith('.shp'):
         gdf = gpd.read_file(file_path)
         return gdf
-    if file_path.endswith('.gdb'):
+    elif file_path.endswith('.csv'):
+        df = pd.read_csv(file_path)
+        gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geometry))
+        return gdf
+    elif file_path.endswith('.gdb'):
         gpd.read_file(os.path.join(file_path, file))
     elif file_path.startswith('http://') or file_path.startswith('https://'):
         base_url = file_path.split("?")[0]  # remove any existing parameters
