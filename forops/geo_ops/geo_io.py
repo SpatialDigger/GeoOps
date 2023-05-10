@@ -52,6 +52,9 @@ def read_data(file_path, rows_per_request=0, offset=0, crs=27700):
     if file_path.endswith('.shp'):
         gdf = gpd.read_file(file_path)
         return gdf
+    elif file_path.endswith('.geojson'):
+        gdf = gpd.read_file(file_path)
+        return gdf
     elif file_path.endswith('.csv'):
         df = pd.read_csv(file_path)
         gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geometry))
