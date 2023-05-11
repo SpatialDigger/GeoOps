@@ -287,3 +287,56 @@ def raster_calculator(raster1, raster2, output_path, operation):
 
 
 
+
+
+
+import rasterio
+from rasterio.transform import from_origin
+import numpy as np
+import rasterio
+from rasterio.transform import from_origin
+import numpy as np
+
+
+def points_to_raster(gdf, cell_size, output_file, value_column=None):
+    # Get the bounding box of the GeoDataFrame
+    bounds = gdf.total_bounds
+
+
+
+
+
+    # Calculate the dimensions of the raster based on the bounding box and cell size
+    width = int((bounds[2] - bounds[0]) / cell_size)
+    height = int((bounds[3] - bounds[1]) / cell_size)
+
+    # Create an empty raster with the specified dimensions
+    raster = np.zeros((height, width))
+
+    # Create the transform for the raster
+    transform = from_origin(bounds[0], bounds[1] + cell_size * height, cell_size, cell_size)
+
+    # Loop through each point and update the raster cell with the value from the specified column
+    if value_column is not None:
+        for idx, point in gdf.iterrows():
+            col = int((point.geometry.x - bounds[0]) / cell_size)
+            row = int((bounds[3] - point.geometry.y) / cell_size)
+
+            # Check if the calculated indices are within the valid range
+            if 0 <= row < height and 0 <= col < width:
+                raster[row, col] += point[value_column]
+    else:
+        # If no value_column is specified, assume each point represents a single value
+        for idx, point in gdf.iterrows():
+            col = int((point.geometry.x - bounds[0]) / cell_size)
+            row = int((bounds[3] - point.geometry.y) / cell_size)
+
+            # Check if the calculated indices are within the valid range
+            if 0 <= row < height and 0 <= col < width:
+                raster[row, col] += 1
+
+    # Save the raster to a file using rasterio
+    with rasterio.open(output_file, 'w', driver='GTiff', height=height, width=width, count=1, dtype=raster.dtype, crs=gdf.crs, transform=transform) as dst:
+        dst.write(raster, 1)
+
+
