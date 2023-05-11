@@ -97,7 +97,11 @@ def read_data(file_path, rows_per_request=0, offset=0, crs=27700):
             data = json.load(f)
         return gpd.GeoDataFrame.from_features(data)
     else:
-        print("File is not a shapefile or URL")
+        try:
+            gdf = gpd.read_file(file_path)
+            return gdf
+        except Exception:
+            print("File is not a supported data format")
         return None
 
 
