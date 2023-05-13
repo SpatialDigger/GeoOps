@@ -2,7 +2,7 @@ import geopandas as gpd
 from shapely.geometry import Point, LineString, Polygon, MultiPoint
 from shapely.ops import transform, unary_union, polygonize, cascaded_union
 from osgeo import gdal
-import rasterstats
+# import rasterstats
 import numpy as np
 from scipy.stats import skew, kurtosis
 
