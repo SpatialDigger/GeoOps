@@ -340,3 +340,59 @@ def points_to_raster(gdf, cell_size, output_file, value_column=None):
         dst.write(raster, 1)
 
 
+
+
+
+def read_raster_file(raster_file):
+    """
+    Function to read a raster file using the rasterio library.
+
+    Args:
+        raster_file (str): Path to the raster file.
+
+    Returns:
+        raster_array (numpy.ndarray): Array containing the raster data.
+        raster_profile (dict): Profile metadata of the raster.
+
+    """
+
+    # Open the raster file using rasterio
+    with rasterio.open(raster_file) as raster:
+        # Read the raster data into an array
+        raster_array = raster.read(1)
+        # Retrieve the profile metadata of the raster
+        raster_profile = raster.profile
+
+    # Return the raster array and profile
+    return raster_array, raster_profile
+
+
+def write_raster(filename, data, transform, crs):
+    """
+    Write a GeoTIFF raster using the given data, transform, and CRS.
+
+    Args:
+        filename (str): Output file name.
+        data (numpy.ndarray): 2D numpy array of raster values.
+        transform (affine.Affine): Affine transformation object.
+        crs (rasterio.crs.CRS): CRS object.
+
+    Returns:
+        None.
+    """
+    height, width = data.shape
+    count = 1
+    dtype = data.dtype
+    with rasterio.open(
+        filename,
+        'w',
+        driver='GTiff',
+        height=height,
+        width=width,
+        count=count,
+        dtype=dtype,
+        crs=crs,
+        transform=transform
+    ) as dst:
+        dst.write(data, 1)
+
