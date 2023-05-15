@@ -264,7 +264,7 @@ def read_raster_file(raster_file):
     return raster_array, raster_profile
 
 
-def read_data(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent=''):
+def read_data(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent=None, extra_query=None):
     """
     Function to read geospatial data from different sources.
 
