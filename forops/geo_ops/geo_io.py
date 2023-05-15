@@ -264,7 +264,7 @@ def read_raster_file(raster_file):
     return raster_array, raster_profile
 
 
-def read_data(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent=None, extra_query=None):
+def read_data2(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent=None, extra_query=None):
     """
     Function to read geospatial data from different sources.
 
@@ -305,6 +305,65 @@ def read_data(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent
     elif file_path.startswith('http://') or file_path.startswith('https://'):
         # Read data from a URL
         return read_from_url2(file_path, rows_per_request, offset, crs, spatial_extent=None, extra_query=None)
+    elif file_path.endswith('.geojson'):
+        # Read GeoJSON file directly
+        with open(file_path) as f:
+            data = json.load(f)
+        return gpd.GeoDataFrame.from_features(data)
+    elif file_path.endswith('.tif'):
+        raster_array, raster_profile = read_raster_file(file_path)
+        return raster_array, raster_profile
+    else:
+        # Try reading the file assuming it's in a supported format
+        try:
+            return gpd.read_file(file_path)
+        except Exception as e:
+            print(f"Error reading file: {e}")
+        return None
+
+
+
+def read_data(file_path, rows_per_request=0, offset=0, crs=27700):
+    """
+    Function to read geospatial data from different sources.
+
+    Args:
+        file_path (str): Path to the data file or URL.
+        rows_per_request (int): Number of rows to request per API call (default: 0).
+        offset (int): Offset value for pagination (default: 0).
+        crs (int): Coordinate Reference System (CRS) code (default: 27700).
+        spatial_extent (): A list of
+
+    Returns:
+        gdf (geopandas.GeoDataFrame): Geospatial data as a GeoDataFrame.
+
+    """
+
+    # Check if the file path ends with specific extensions
+    if file_path.endswith('.shp'):
+        # Read shapefile
+        return gpd.read_file(file_path)
+    elif file_path.endswith('.geojson'):
+        # Read GeoJSON file
+        return gpd.read_file(file_path)
+    elif file_path.endswith('.gpkg'):
+        # Read GeoPackage file
+        return gpd.read_file(file_path)
+    elif file_path.endswith('.csv'):
+        # This should be its own function
+        # Read CSV file
+        df = pd.read_csv(file_path)
+        # Convert DataFrame to GeoDataFrame
+        gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geometry))
+        # Set the coordinate reference system (CRS)
+        gdf = gdf.set_crs(crs)
+        return gdf
+    elif file_path.endswith('.gdb'):
+        # Read file from a Geodatabase (.gdb)
+        gpd.read_file(os.path.join(file_path))
+    elif file_path.startswith('http://') or file_path.startswith('https://'):
+        # Read data from a URL
+        return read_from_url(file_path, rows_per_request, offset, crs)
     elif file_path.endswith('.geojson'):
         # Read GeoJSON file directly
         with open(file_path) as f:
