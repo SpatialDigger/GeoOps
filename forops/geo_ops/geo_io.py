@@ -304,7 +304,7 @@ def read_data(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent
         gpd.read_file(os.path.join(file_path))
     elif file_path.startswith('http://') or file_path.startswith('https://'):
         # Read data from a URL
-        return read_from_url(file_path, rows_per_request, offset, crs)
+        return read_from_url2(file_path, rows_per_request, offset, crs, spatial_extent=None, extra_query=None)
     elif file_path.endswith('.geojson'):
         # Read GeoJSON file directly
         with open(file_path) as f:
