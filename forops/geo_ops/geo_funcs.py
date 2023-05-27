@@ -102,8 +102,8 @@ def create_square(bottom_left, width, crs="EPSG:27700"):
     return gpd.GeoDataFrame(geometry=[polygon], crs=crs)
 
 
-from pyproj import CRS
-
+# from pyproj import CRS
+#
 from forops.geo_ops.geo_io import read_data
 
 def process_geospatial_data_to_dict(urls):
@@ -214,4 +214,40 @@ def filter_geomtype(gdf, geom_type=['Polygon', 'MultiPolygon']):
     filtered_gdf = gdf[gdf.geometry.type.isin(geom_type)]
     return filtered_gdf
 
+
+def add_area(data, geometry_column, area_column, area_unit='ha'):
+    """
+    Add area information to the data.
+
+    Args:
+        data (GeoDataFrame): The input data containing the geometries.
+        geometry_column (str): The name of the column containing the geometry.
+        area_column (str): The name of the column to store the calculated area.
+        area_unit (str, optional): The desired unit of the calculated area.
+            Supported options: 'ha' (hectares, default), 'm' (square meters),
+            'km' (square kilometers), 'ac' (acres), 'ft' (square feet).
+
+    Returns:
+        GeoDataFrame: The input data with the added area column.
+
+    """
+    # Add area information to the data
+
+    if area_unit == 'ha':
+        # Convert area to hectares (default)
+        data[area_column] = data[geometry_column].area / 10000
+    elif area_unit == 'm':
+        # Keep area in square meters
+        data[area_column] = data[geometry_column].area
+    elif area_unit == 'km':
+        # Convert area to square kilometers
+        data[area_column] = data[geometry_column].area / 1000000
+    elif area_unit == 'ac':
+        # Convert area to acres
+        data[area_column] = data[geometry_column].area / 4046.8564224
+    elif area_unit == 'ft':
+        # Convert area to square feet
+        data[area_column] = data[geometry_column].area * 10.763910417
+
+    return data
 
