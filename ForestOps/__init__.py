@@ -1,9 +1,3 @@
-from .geo_ops import *
-from .stats import *
-
-import subprocess
-import warnings
-
 import subprocess
 import warnings
 
@@ -24,16 +18,19 @@ def check_newer_version(package_name, current_version):
 
 
 def _warn_if_newer_version_available():
-    package_name = 'forops'
-    current_version = '0.0.6'
+    package_name = 'ForestOps'
+    current_version = '0.0.7'
 
     if check_newer_version(package_name, current_version):
-        warning_message = f"A newer version of {package_name} is available. Please consider upgrading."
-        warnings.warn(warning_message, UserWarning)
+        warning_message = f"A newer version of {package_name} is available, it is named ForestOps 0.0.7. Please consider upgrading."
     else:
         warning_message = f"This is the latest version of {package_name}. Beware it is under development, please report any bugs."
-        warnings.warn(warning_message, UserWarning)
 
+    warnings.warn(warning_message, UserWarning)
 
 
 _warn_if_newer_version_available()
+
+
+from .geo_ops import *
+from .stats import *

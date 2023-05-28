@@ -104,7 +104,7 @@ def create_square(bottom_left, width, crs="EPSG:27700"):
 
 # from pyproj import CRS
 #
-from forops.geo_ops.geo_io import read_data
+from ForestOps.geo_ops.geo_io import read_data
 
 def process_geospatial_data_to_dict(urls):
     """
