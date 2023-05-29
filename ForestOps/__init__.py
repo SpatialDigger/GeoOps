@@ -19,10 +19,10 @@ def check_newer_version(package_name, current_version):
 
 def _warn_if_newer_version_available():
     package_name = 'ForestOps'
-    current_version = '0.0.7'
+    current_version = '0.1.0'
 
     if check_newer_version(package_name, current_version):
-        warning_message = f"A newer version of {package_name} is available, it is named ForestOps 0.0.7. Please consider upgrading."
+        warning_message = f"A newer version of {package_name} is available. Please consider upgrading."
     else:
         warning_message = f"This is the latest version of {package_name}. Beware it is under development, please report any bugs."
 
