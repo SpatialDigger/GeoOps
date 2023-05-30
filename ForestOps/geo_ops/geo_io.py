@@ -143,7 +143,7 @@ def read_from_url(file_path, rows_per_request, offset, crs):
             rows_per_request = max_rows
 
     number_requests = count / rows_per_request
-    print(f"Record count = {count}, splitting into {number_requests} requests")
+    print(f"Record count = {count}, splitting into {round(number_requests)} requests")
 
     features = []
     while True:
@@ -247,118 +247,8 @@ def read_data(file_path, rows_per_request=0, offset=0, crs=27700):
             print(f"Error reading file: {e}")
         return None
 
-#
-# def read_from_url2(file_path, rows_per_request, offset, crs, spatial_extent=None):
-#     # Read data from a URL
-#     base_url = file_path.split("?")[0]  # remove any existing parameters
-#     count = get_feature_count(url=base_url)
-#     max_rows = get_record_limit(file_path)
-#
-#     if rows_per_request == 0 or rows_per_request > max_rows:
-#         # Determine the number of rows per request based on the record limit
-#         if rows_per_request == 0:
-#             print(f"Record limit not set, using server limit of {max_rows}")
-#             rows_per_request = max_rows
-#         else:
-#             print(f"Limit exceeded, using server limit of {max_rows}")
-#             rows_per_request = max_rows
-#
-#     number_requests = count / rows_per_request
-#     print(f"Record Count = {count}, splitting into {number_requests} requests")
-#
-#     features = []
-#     while True:
-#         print(offset)
-#         # Construct the query URL
-#         query = f"{base_url}?outFields=*&where=1%3D1&f=geojson&resultOffset={offset}&resultRecordCount={rows_per_request}"
-#
-#         if spatial_extent is not None:
-#             # Construct a where clause that filters by the spatial extent
-#             extent_where = f"({gpd.read_file({spatial_extent}).geometry.name}.intersects({spatial_extent.bounds}))"
-#
-#             # Append the extent where clause to the query
-#             query += f" and {extent_where}"
-#
-#         # Read data from the query URL
-#         gdf = gpd.read_file(query)
-#
-#         if len(gdf) == 0:
-#             break
-#
-#         features.append(gdf)
-#         offset += rows_per_request
-#
-#     gdf = gpd.GeoDataFrame(pd.concat(features, ignore_index=True))
-#     # Set the coordinate reference system (CRS)
-#     gdf = gdf.to_crs(crs)
-#     return gdf
-#
-#
-#
-# def read_data2(file_path, rows_per_request=0, offset=0, crs=27700, spatial_extent=None, extra_query=None):
-#     """
-#     Function to read geospatial data from different sources.
-#
-#     Args:
-#         file_path (str): Path to the data file or URL.
-#         rows_per_request (int): Number of rows to request per API call (default: 0).
-#         offset (int): Offset value for pagination (default: 0).
-#         crs (int): Coordinate Reference System (CRS) code (default: 27700).
-#         spatial_extent (): A list of
-#
-#     Returns:
-#         gdf (geopandas.GeoDataFrame): Geospatial data as a GeoDataFrame.
-#
-#     """
-#
-#     # Check if the file path ends with specific extensions
-#     if file_path.endswith('.shp'):
-#         # Read shapefile
-#         return gpd.read_file(file_path)
-#     elif file_path.endswith('.geojson'):
-#         # Read GeoJSON file
-#         return gpd.read_file(file_path)
-#     elif file_path.endswith('.gpkg'):
-#         # Read GeoPackage file
-#         return gpd.read_file(file_path)
-#     elif file_path.endswith('.csv'):
-#         # This should be its own function
-#         # Read CSV file
-#         df = pd.read_csv(file_path)
-#         # Convert DataFrame to GeoDataFrame
-#         gdf = gpd.GeoDataFrame(df, geometry=gpd.GeoSeries.from_wkt(df.geometry))
-#         # Set the coordinate reference system (CRS)
-#         gdf = gdf.set_crs(crs)
-#         return gdf
-#     elif file_path.endswith('.gdb'):
-#         # Read file from a Geodatabase (.gdb)
-#         gpd.read_file(os.path.join(file_path))
-#     elif file_path.startswith('http://') or file_path.startswith('https://'):
-#         # Read data from a URL
-#         return read_from_url2(file_path, rows_per_request, offset, crs, spatial_extent, extra_query)
-#     elif file_path.endswith('.geojson'):
-#         # Read GeoJSON file directly
-#         with open(file_path) as f:
-#             data = json.load(f)
-#         return gpd.GeoDataFrame.from_features(data)
-#     elif file_path.endswith('.tif'):
-#         raster_array, raster_profile = read_raster_file(file_path)
-#         return raster_array, raster_profile
-#     else:
-#         # Try reading the file assuming it's in a supported format
-#         try:
-#             return gpd.read_file(file_path)
-#         except Exception as e:
-#             print(f"Error reading file: {e}")
-#         return None
-#
-#
-#
-# url = 'https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Ancient_Woodland_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json'
-# read_data(file_path=url, rows_per_request=0, offset=0, crs=27700)
-
-
-
+url = 'https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Ancient_Woodland_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json'
+read_data(file_path=url, rows_per_request=0, offset=0, crs=27700)
 
 
 # Write out Datasets

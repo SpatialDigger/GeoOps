@@ -1,18 +1,31 @@
 '''
 This is for any functions applied to geometry
+
+It will need arranging into sections
 '''
 
 
-# Repair Geometry
-
-
-from shapely.geometry import MultiPolygon
 from shapely.validation import explain_validity
+import matplotlib.pyplot as plt
 import pandas as pd
+import geopandas as gpd
+from shapely.geometry import MultiPolygon, Polygon
+from pyproj import CRS
+from ForestOps.geo_ops.geo_io import read_data
 
 
 def fix_invalid_geometries(gdf):
-    # split this apart into individual functions
+    """
+    Fix invalid geometries in a GeoDataFrame.
+
+    Args:
+        gdf (GeoDataFrame): Input GeoDataFrame with potentially invalid geometries.
+
+    Returns:
+        GeoDataFrame: GeoDataFrame with fixed geometries.
+    """
+
+    # Make a copy of the input GeoDataFrame
     fixed_gdf = gdf.copy()
 
     # Check for missing geometries and remove the corresponding rows
@@ -22,21 +35,26 @@ def fix_invalid_geometries(gdf):
         print(missing_geometries)
     fixed_gdf = fixed_gdf[fixed_gdf['geometry'].notna()]
 
+    # Iterate over each geometry in the GeoDataFrame
     for idx, geometry in fixed_gdf['geometry'].iteritems():
+        # Check if the geometry is invalid
         if not geometry.is_valid:
+            # Fix the invalid geometry by buffering it with a distance of 0
             fixed_geometry = geometry.buffer(0)
+
+            # Convert single Polygon to MultiPolygon if necessary
             if fixed_geometry.geom_type == 'Polygon':
                 fixed_geometry = MultiPolygon([fixed_geometry])
+
+            # Update the geometry in the GeoDataFrame with the fixed geometry
             fixed_gdf.loc[idx, 'geometry'] = fixed_geometry
 
-            valid_reason = explain_validity(geometry)
-            fixed_geom = explain_validity(fixed_geometry)
-            print(f"Invalid geometry in GeoDataFrame: index {idx}: {valid_reason} \nResult: {fixed_geom}")
+            # Print information about the invalid and fixed geometries
+            valid_reason = explain_validity(geometry)  # Assuming `explain_validity` is defined elsewhere
+            fixed_geom = explain_validity(fixed_geometry)  # Assuming `explain_validity` is defined elsewhere
+            print(f"Invalid geometry in GeoDataFrame: index {idx}: {valid_reason}\nResult: {fixed_geom}")
 
     return fixed_gdf
-
-
-from pyproj import CRS
 
 
 def check_crs(data, crs):
@@ -64,10 +82,6 @@ def check_crs(data, crs):
         data = data.to_crs(crs)
 
     return data
-
-
-import geopandas as gpd
-from shapely.geometry import Polygon
 
 
 def create_square(bottom_left, width, crs="EPSG:27700"):
@@ -101,10 +115,6 @@ def create_square(bottom_left, width, crs="EPSG:27700"):
 
     return gpd.GeoDataFrame(geometry=[polygon], crs=crs)
 
-
-# from pyproj import CRS
-#
-from ForestOps.geo_ops.geo_io import read_data
 
 def process_geospatial_data_to_dict(urls):
     """
@@ -142,10 +152,6 @@ def process_geospatial_data_to_dict(urls):
             continue
 
     return data
-
-
-import geopandas as gpd
-import pandas as pd
 
 
 def chunk_geodataframe(gdf, chunk_size=100000):
@@ -194,25 +200,189 @@ def reassemble_geodataframe(gdfs):
     Returns:
         geopandas.GeoDataFrame: A single geodataframe containing all the rows from the input geodataframes.
     """
-    # Concatenate the geodataframes into a single geodataframe
-    gdf = pd.concat(gdfs, ignore_index=True)
-
-    return gdf
+    return pd.concat(gdfs, ignore_index=True)
 
 
 def cut_and_retain_intersection(gdf):
+    """
+    Cut the geometries of a GeoDataFrame using their intersection with the union of all geometries.
+
+    Args:
+        gdf (GeoDataFrame): Input GeoDataFrame.
+
+    Returns:
+        GeoDataFrame: GeoDataFrame with cut geometries.
+    """
     print('cutting and retaining geometry')
+
     # Create a copy of the GeoDataFrame to avoid modifying the original
     gdf_cut = gdf.copy()
 
+    # Perform intersection of each geometry with the union of all geometries
     gdf_cut['geometry'] = gdf_cut.geometry.intersection(gdf_cut.geometry.unary_union)
 
     return gdf_cut
 
 
-def filter_geomtype(gdf, geom_type=['Polygon', 'MultiPolygon']):
-    filtered_gdf = gdf[gdf.geometry.type.isin(geom_type)]
-    return filtered_gdf
+def extract_overlapping_polygons(gdf1, gdf2):
+    """
+    Extract polygons from gdf1 that overlap with gdf2.
+
+    Args:
+        gdf1 (GeoDataFrame): First GeoDataFrame.
+        gdf2 (GeoDataFrame): Second GeoDataFrame.
+
+    Returns:
+        GeoDataFrame: GeoDataFrame with overlapping polygons from gdf1.
+    """
+    # Perform a spatial join using 'intersects' operation
+    intersection = gpd.sjoin(gdf1, gdf2, how='inner', predicate='intersects')
+
+    # Extract the indices of polygons from gdf1 that overlap with gdf2
+    overlapping_indices = intersection.index.unique()
+
+    return gdf1[gdf1.index.isin(overlapping_indices)]
+
+
+def extract_non_overlapping_polygons(gdf1, gdf2):
+    """
+    Extract polygons from gdf1 that do not overlap with gdf2.
+
+    Args:
+        gdf1 (GeoDataFrame): First GeoDataFrame.
+        gdf2 (GeoDataFrame): Second GeoDataFrame.
+
+    Returns:
+        GeoDataFrame: GeoDataFrame with non-overlapping polygons from gdf1.
+    """
+    # Perform a spatial join using 'intersects' operation
+    intersection = gpd.sjoin(gdf1, gdf2, how='left', predicate='intersects')
+
+    # Extract the indices of polygons from gdf1 that do not overlap with gdf2
+    non_overlapping_indices = intersection[intersection.index_right.isna()].index.unique()
+
+    return gdf1[gdf1.index.isin(non_overlapping_indices)]
+
+
+def plot_layers(gdf1, gdf2=None, title=None):
+    """
+    Plot GeoDataFrames on a single figure.
+
+    Args:
+        gdf1 (GeoDataFrame): First GeoDataFrame to be plotted.
+        gdf2 (GeoDataFrame, optional): Second GeoDataFrame to be plotted. Defaults to None.
+        title (str, optional): Title of the plot. Defaults to None.
+    """
+    # Create a new figure and axis
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    # Plot the gdf1 GeoDataFrame
+    gdf1.plot(ax=ax, facecolor='lightblue', edgecolor='blue')
+
+    # Plot the gdf2 GeoDataFrame if provided
+    if gdf2 is not None:
+        gdf2.plot(ax=ax, facecolor='black', edgecolor='black', linewidth=1.5, alpha=0.5)
+
+    # Set axis labels and title
+    ax.set_xlabel('Easting')
+    ax.set_ylabel('Northing')
+    if title is not None:
+        ax.set_title(title)
+
+    # Set the axis limits based on the bounding box of gdf1
+    ax.set_xlim(gdf1.total_bounds[0], gdf1.total_bounds[2])
+    ax.set_ylim(gdf1.total_bounds[1], gdf1.total_bounds[3])
+
+    # Show the plot
+    plt.show()
+
+
+def add_overlap_indicator(gdf1, gdf2, column_name):
+    """
+    Add an overlap indicator column to gdf1 based on its intersection with gdf2.
+
+    Args:
+        gdf1 (GeoDataFrame): First GeoDataFrame.
+        gdf2 (GeoDataFrame): Second GeoDataFrame.
+        column_name (str): Name of the column to be added.
+
+    Returns:
+        GeoDataFrame: gdf1 with the overlap indicator column added.
+    """
+    overlap = gpd.overlay(gdf1, gdf2, how='intersection')
+    gdf1[column_name] = gdf1.index.isin(overlap.index)
+    return gdf1
+
+
+def clip_and_combine(gdf1, gdf2, column):
+    """
+    Clip and combine gdf1 with gdf2 based on their intersection.
+
+    Args:
+        gdf1 (GeoDataFrame): First GeoDataFrame.
+        gdf2 (GeoDataFrame): Second GeoDataFrame.
+        column (str): Name of the column to be added for indicating the intersection.
+
+    Returns:
+        Tuple: A tuple containing:
+            - GeoDataFrame: Resulting GeoDataFrame after clipping and combining.
+            - GeoDataFrame: GeoDataFrame representing the intersecting polygons.
+            - GeoDataFrame: GeoDataFrame representing the non-intersecting polygons.
+    """
+    parcel_columns = gdf1.columns
+
+    gdf_intersect = gpd.overlay(gdf1, gdf2, how='intersection', keep_geom_type=True)
+    gdf_intersect = gdf_intersect.reindex(columns=parcel_columns)
+    gdf_intersect[column] = True
+
+    gdf_difference = gpd.overlay(gdf1, gdf2, how='difference', keep_geom_type=True)
+    gdf_difference = gdf_difference.reindex(columns=parcel_columns)
+    gdf_difference[column] = False
+
+    result = gpd.GeoDataFrame(pd.concat([gdf_intersect, gdf_difference], ignore_index=True))
+
+    result['area'] = result.area
+
+    return result, gdf_intersect, gdf_difference
+
+
+def print_unique_row_counts(gdf, column, disable=False):
+    """
+    Print the counts of unique rows based on the specified column.
+
+    Args:
+        gdf (GeoDataFrame): GeoDataFrame to count unique rows from.
+        column (str): Column name for counting unique rows.
+        disable (bool, optional): Flag to disable printing. Defaults to False.
+
+    Returns:
+        int: Number of unique rows.
+    """
+    # Calculate the count of unique rows based on the specified column
+    unique_counts = gdf[column].value_counts()
+
+    if not disable:
+        # Iterate over the unique values and print the counts
+        for value, count in unique_counts.items():
+            print(f"Parcel ID: {value}, Count: {count}")
+    return len(unique_counts)
+
+
+def filter_geomtype(gdf, geom_type=None):
+    """
+    Filter a GeoDataFrame based on the geometry types.
+
+    Args:
+        gdf (GeoDataFrame): Input GeoDataFrame.
+        geom_type (list, optional): List of valid geometry types to retain. Defaults to ['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon', 'GeometryCollection'].
+
+    Returns:
+        GeoDataFrame: Filtered GeoDataFrame.
+    """
+    if geom_type is None:
+        geom_type = ['Point', 'LineString', 'Polygon', 'MultiPoint', 'MultiLineString', 'MultiPolygon', 'GeometryCollection']
+
+    return gdf[gdf.geometry.type.isin(geom_type)]
 
 
 def add_area(data, geometry_column, area_column, area_unit='ha'):
@@ -248,6 +418,4 @@ def add_area(data, geometry_column, area_column, area_unit='ha'):
     elif area_unit == 'ft':
         # Convert area to square feet
         data[area_column] = data[geometry_column].area * 10.763910417
-
     return data
-
