@@ -247,8 +247,8 @@ def read_data(file_path, rows_per_request=0, offset=0, crs=27700):
             print(f"Error reading file: {e}")
         return None
 
-url = 'https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Ancient_Woodland_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json'
-read_data(file_path=url, rows_per_request=0, offset=0, crs=27700)
+# url = 'https://services.arcgis.com/JJzESW51TqeY9uat/arcgis/rest/services/Ancient_Woodland_England/FeatureServer/0/query?where=1%3D1&outFields=*&outSR=4326&f=json'
+# read_data(file_path=url, rows_per_request=0, offset=0, crs=27700)
 
 
 # Write out Datasets
