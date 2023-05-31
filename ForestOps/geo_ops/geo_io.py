@@ -149,7 +149,7 @@ def read_from_url(file_path, rows_per_request, offset, crs):
     while True:
         print(f"Offset: {offset}")
         # Construct the query URL
-        query = f"{base_url}?outFields=*&where=1%3D1&f=geojson&resultOffset={offset}&resultRecordCount={rows_per_request}"
+        query = f"{base_url}?outFields=*&outSR={crs}&where=1%3D1&f=geojson&resultOffset={offset}&resultRecordCount={rows_per_request}"
         # Read data from the query URL
         gdf = gpd.read_file(query)
 

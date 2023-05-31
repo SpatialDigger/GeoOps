@@ -34,3 +34,4 @@ _warn_if_newer_version_available()
 
 from .geo_ops import *
 from .stats import *
+from .data_ops import *
